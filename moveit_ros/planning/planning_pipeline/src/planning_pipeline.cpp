@@ -254,8 +254,51 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     ROS_DEBUG_STREAM("Motion planner reported a solution path with " << state_count << " states");
     if (check_solution_paths_)
     {
+      // std::size n_wp = res.trajectory_->getWayPointCount();e
+      robot_trajectory::RobotTrajectoryPtr resampled_trj = robot_trajectory::RobotTrajectoryPtr(new robot_trajectory::RobotTrajectory(res.trajectory_->getRobotModel(), res.trajectory_->getGroup()));
+      bool is_valid = false;
       std::vector<std::size_t> index;
-      if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
+
+      if(state_count > 100 ){
+          ROS_INFO_STREAM("Checking with resampled trajectory");
+          ROS_INFO_STREAM("Starting traject has: " << state_count << "points " );
+
+                  double dt = 0.1 ; // Check every 100 ms
+                  int current_point = 0 ;
+
+                  for(int i = 1; i<state_count; ++i){
+
+                    double next_point = current_point*dt ;
+
+                    if(res.trajectory_->getWaypointDurationFromStart(i) > next_point )
+                    {
+                      current_point++;
+                      //ROS_ERROR_STREAM("Adding point at t == " << next_point );
+                      resampled_trj->addSuffixWayPoint(res.trajectory_->getWayPoint(i), dt);
+                    }
+
+                  }
+
+
+                  ROS_INFO_STREAM("Adding end point ");
+                  resampled_trj->addSuffixWayPoint(res.trajectory_->getWayPoint(state_count-1), dt);
+
+                  ROS_INFO_STREAM("Resampled traject has: " << resampled_trj->getWayPointCount() << "points " );
+
+                  ROS_INFO_STREAM("Checking solution paths with resampled trajectory");
+                  is_valid  = planning_scene->isPathValid(*resampled_trj, req.path_constraints, req.group_name, false, &index);
+                  ROS_INFO_STREAM("[Done]");
+
+
+
+      }else{
+          ROS_INFO_STREAM("Checking with original trajectory");
+          is_valid = planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index) ;
+
+      }
+
+
+      if (!is_valid)
       {
         // check to see if there is any problem with the states that are found to be invalid
         // they are considered ok if they were added by a planning request adapter
@@ -272,6 +315,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           if (!found)
             problem = true;
         }
+
         if (problem)
         {
           if (index.size() == 1 && index[0] == 0)  // ignore cases when the robot starts at invalid location
