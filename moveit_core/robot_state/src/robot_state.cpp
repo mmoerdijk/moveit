@@ -298,6 +298,13 @@ void moveit::core::RobotState::setVariablePositions(const double* position)
   dirty_link_transforms_ = robot_model_->getRootJoint();
 }
 
+void moveit::core::RobotState::setLazyPVC(int joint, double x, double dx, double ddx){
+
+    this->position_[joint] = x ;
+    this->velocity_[joint] = dx ;
+    this->acceleration_[joint] = ddx ;
+}
+
 void moveit::core::RobotState::setVariablePositions(const std::map<std::string, double>& variable_map)
 {
   for (std::map<std::string, double>::const_iterator it = variable_map.begin(), end = variable_map.end(); it != end;

@@ -1680,6 +1680,7 @@ as the new values that correspond to the group */
 
   std::string getStateTreeString(const std::string& prefix = "") const;
 
+  void setLazyPVC(int joint, double x, double dx, double ddx);
 private:
   void allocMemory();
 

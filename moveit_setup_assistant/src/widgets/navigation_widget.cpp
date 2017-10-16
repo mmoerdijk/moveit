@@ -164,7 +164,7 @@ void NavDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, c
 
   QFont textFont(painter->font());
   textFont.setPixelSize(14);    // Set font size
-  textFont.setFamily("Arial");  // Helvetica Neue");
+  textFont.setFamily("Liberation Sans");  // Helvetica Neue");
   painter->setFont(textFont);
 
   // Font color

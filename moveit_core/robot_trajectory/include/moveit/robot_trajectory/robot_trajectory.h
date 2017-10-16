@@ -111,6 +111,12 @@ public:
     return duration_from_previous_;
   }
 
+  void resize(int count){
+      waypoints_.resize(count);
+      duration_from_previous_.resize(count);
+  }
+
+
   /** @brief  Returns the duration after start that a waypoint will be reached.
    *  @param  The waypoint index.
    *  @return The duration from start; retuns -1.0 if index is out of range.
@@ -161,6 +167,7 @@ public:
     duration_from_previous_.push_back(dt);
   }
 
+
   void addPrefixWayPoint(const robot_state::RobotState& state, double dt)
   {
     addPrefixWayPoint(robot_state::RobotStatePtr(new robot_state::RobotState(state)), dt);
@@ -182,6 +189,13 @@ public:
   {
     state->update();
     waypoints_.insert(waypoints_.begin() + index, state);
+    duration_from_previous_.insert(duration_from_previous_.begin() + index, dt);
+  }
+
+  void insertWayPointLazy(std::size_t index, const robot_state::RobotState& state, double dt)
+  {
+    robot_state::RobotStatePtr state_ptr = robot_state::RobotStatePtr(new robot_state::RobotState(state));
+    waypoints_.insert(waypoints_.begin() + index, state_ptr);
     duration_from_previous_.insert(duration_from_previous_.begin() + index, dt);
   }
 
